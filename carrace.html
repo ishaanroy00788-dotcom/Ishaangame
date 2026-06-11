@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚗 Car Racing Game</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.road{
+    width:340px;
+    height:550px;
+    margin:20px auto;
+    position:relative;
+    overflow:hidden;
+    border-radius:20px;
+    background:linear-gradient(#555,#333);
+    border:6px solid white;
+    box-shadow:0 0 30px rgba(0,0,0,.5);
+}
+
+.line{
+    position:absolute;
+    width:12px;
+    height:100px;
+    background:white;
+    left:164px;
+    border-radius:20px;
+}
+
+.car{
+    width:65px;
+    height:110px;
+    position:absolute;
+    bottom:20px;
+    left:135px;
+    border-radius:15px;
+    background:linear-gradient(#3b82f6,#1d4ed8);
+    box-shadow:0 0 15px rgba(59,130,246,.8);
+}
+
+.enemy{
+    width:65px;
+    height:110px;
+    position:absolute;
+    top:-120px;
+    border-radius:15px;
+    background:linear-gradient(#ef4444,#b91c1c);
+    box-shadow:0 0 15px rgba(239,68,68,.8);
+}
+
+.controls{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    margin-top:15px;
+}
+
+.control-btn{
+    padding:15px 25px;
+    font-size:22px;
+    border:none;
+    border-radius:12px;
+    background:#3b82f6;
+    color:white;
+    cursor:pointer;
+}
+
+.control-btn:hover{
+    transform:scale(1.05);
+}
+
+#result{
+    margin-top:15px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+@media(max-width:768px){
+
+.road{
+    width:280px;
+    height:450px;
+}
+
+.line{
+    left:134px;
+}
+
+.car,
+.enemy{
+    width:55px;
+    height:95px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game-box">
+
+<h1>🚗 Car Racing</h1>
+
+<h2>🏆 Score: <span id="score">0</span></h2>
+
+<h3>🥇 High Score: <span id="highScore">0</span></h3>
+
+<div class="road">
+
+<div class="line" id="line1"></div>
+<div class="line" id="line2" style="top:-250px;"></div>
+
+<div class="car" id="player"></div>
+
+<div class="enemy" id="enemy"></div>
+
+</div>
+
+<div class="controls">
+
+<button class="control-btn" onclick="moveLeft()">
+⬅
+</button>
+
+<button class="control-btn" onclick="moveRight()">
+➡
+</button>
+
+</div>
+
+<br>
+
+<button class="play-btn" onclick="startGame()">
+🚀 Start Game
+</button>
+
+<button class="play-btn" onclick="startGame()">
+🔄 Restart
+</button>
+
+<button class="back-btn" onclick="location.href='home.html'">
+← Back
+</button>
+
+<h2 id="result"></h2>
+
+</div>
+
+<script>
+
+let playerX = 135;
+let enemyX = 20;
+let enemyY = -120;
+
+let score = 0;
+let speed = 5;
+let gameRunning = false;
+
+const player = document.getElementById("player");
+const enemy = document.getElementById("enemy");
+
+const line1 = document.getElementById("line1");
+const line2 = document.getElementById("line2");
+
+let lineY1 = 0;
+let lineY2 = -250;
+
+let highScore =
+localStorage.getItem("carHighScore") || 0;
+
+document.getElementById("highScore").innerText =
+highScore;
+
+function moveLeft(){
+
+if(!gameRunning) return;
+
+playerX -= 110;
+
+if(playerX < 20){
+playerX = 20;
+}
+
+player.style.left = playerX + "px";
+}
+
+function moveRight(){
+
+if(!gameRunning) return;
+
+playerX += 110;
+
+if(window.innerWidth < 768){
+
+if(playerX > 200){
+playerX = 200;
+}
+
+}else{
+
+if(playerX > 245){
+playerX = 245;
+}
+
+}
+
+player.style.left = playerX + "px";
+}
+
+function startGame(){
+
+score = 0;
+speed = 5;
+
+document.getElementById("score").innerText = score;
+document.getElementById("result").innerText = "";
+
+playerX = 135;
+player.style.left = playerX + "px";
+
+enemyY = -120;
+
+enemyX = [20,135,245]
+[Math.floor(Math.random()*3)];
+
+enemy.style.left = enemyX + "px";
+
+lineY1 = 0;
+lineY2 = -250;
+
+gameRunning = true;
+
+requestAnimationFrame(gameLoop);
+}
+
+function gameLoop(){
+
+if(!gameRunning) return;
+
+lineY1 += 8;
+lineY2 += 8;
+
+if(lineY1 > 550) lineY1 = -100;
+if(lineY2 > 550) lineY2 = -100;
+
+line1.style.top = lineY1 + "px";
+line2.style.top = lineY2 + "px";
+
+enemyY += speed;
+
+enemy.style.top = enemyY + "px";
+
+if(enemyY > 550){
+
+enemyY = -120;
+
+enemyX = [20,135,245]
+[Math.floor(Math.random()*3)];
+
+enemy.style.left = enemyX + "px";
+
+score++;
+
+if(score % 5 === 0){
+speed += 0.5;
+}
+
+document.getElementById("score").innerText =
+score;
+}
+
+if(
+Math.abs(playerX - enemyX) < 60
+&&
+enemyY > 350
+){
+
+gameRunning = false;
+
+if(score > highScore){
+
+highScore = score;
+
+localStorage.setItem(
+"carHighScore",
+highScore
+);
+
+document.getElementById("highScore").innerText =
+highScore;
+}
+
+document.getElementById("result").innerHTML =
+"💥 GAME OVER<br>🏆 Score: " + score;
+
+return;
+}
+
+requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener("keydown",(e)=>{
+
+if(e.key==="ArrowLeft"){
+moveLeft();
+}
+
+if(e.key==="ArrowRight"){
+moveRight();
+}
+
+});
+
+</script>
+
+</body>
+</html>
